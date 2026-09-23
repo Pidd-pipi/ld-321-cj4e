@@ -42,6 +42,8 @@ func Connect(dsn string, maxOpen, maxIdle, connMaxLifetime, retryCount, retryInt
 		&model.TrackPoint{},
 		&model.WorkRecord{},
 		&model.MaintenanceReminder{},
+		&model.MaintenanceOrder{},
+		&model.MaintenanceExpense{},
 		&model.Driver{},
 		&model.DashboardItem{},
 	); err != nil {
@@ -118,12 +120,19 @@ func Seed(db *gorm.DB) error {
 	}
 	// 保养提醒
 	reminders := []model.MaintenanceReminder{
-		{ID: "s1", MachineCode: "NJ-2026-001", Title: "100 小时换机油", DueDate: "2026-06-05", RemainingHours: 16, Level: "warning", LastServiceRecord: "2026-04-28 已更换滤芯"},
-		{ID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", DueDate: "2026-06-02", RemainingHours: 0, Level: "danger", LastServiceRecord: "2026-05-25 漏油维修"},
-		{ID: "s3", MachineCode: "NJ-2026-002", Title: "刀盘检查", DueDate: "2026-06-12", RemainingHours: 42, Level: "normal", LastServiceRecord: "2026-05-12 例行保养"},
+		{ID: "s1", MachineCode: "NJ-2026-001", Title: "100 小时换机油", DueDate: "2026-06-05", RemainingHours: 16, Level: "warning", Status: "待开单", LastServiceRecord: "2026-04-28 已更换滤芯"},
+		{ID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", DueDate: "2026-06-02", RemainingHours: 0, Level: "danger", Status: "处理中", ActiveOrderID: "wo-seed-001", LastServiceRecord: "2026-05-25 漏油维修"},
+		{ID: "s3", MachineCode: "NJ-2026-002", Title: "刀盘检查", DueDate: "2026-06-12", RemainingHours: 42, Level: "normal", Status: "待开单", LastServiceRecord: "2026-05-12 例行保养"},
 	}
 	if err := db.Create(&reminders).Error; err != nil {
 		return fmt.Errorf("seed reminders: %w", err)
+	}
+	// 保养工单（s2 提醒对应一张处理中工单，农机 NJ-2026-003 同步处于维修中）
+	maintenanceOrders := []model.MaintenanceOrder{
+		{ID: "wo-seed-001", ReminderID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", PlanDate: "2026-06-01", ServicePoint: "县农机服务中心", Status: "处理中"},
+	}
+	if err := db.Create(&maintenanceOrders).Error; err != nil {
+		return fmt.Errorf("seed maintenance orders: %w", err)
 	}
 	// 驾驶员
 	drivers := []model.Driver{

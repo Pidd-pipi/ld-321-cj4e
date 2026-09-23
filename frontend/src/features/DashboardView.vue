@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import DriverRoster from '../components/DriverRoster.vue';
 import MachineTable from '../components/MachineTable.vue';
-import MaintenanceList from '../components/MaintenanceList.vue';
+import MaintenancePanel from '../components/MaintenancePanel.vue';
 import MapTrackPanel from '../components/MapTrackPanel.vue';
 import MetricCard from '../components/MetricCard.vue';
 import RecordStats from '../components/RecordStats.vue';
@@ -15,7 +15,7 @@ const overview = ref<FarmOverview>();
 const loading = ref(true);
 const error = ref('');
 
-onMounted(async () => {
+const loadOverview = async () => {
   try {
     overview.value = await fetchFarmOverview();
     logger.info('farm overview loaded');
@@ -24,7 +24,14 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
-});
+};
+
+// 保养工单状态变更后刷新看板，使工单、费用、提醒节点与农机状态同步。
+const handleMaintenanceChanged = () => {
+  loadOverview();
+};
+
+onMounted(loadOverview);
 </script>
 
 <template>
@@ -47,9 +54,14 @@ onMounted(async () => {
 
       <MachineTable :machines="overview.machines" />
 
-      <section class="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+      <section class="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
         <RecordStats :records="overview.records" />
-        <MaintenanceList :reminders="overview.maintenance" />
+        <MaintenancePanel
+          :reminders="overview.maintenance"
+          :orders="overview.maintenanceOrders"
+          :expenses="overview.maintenanceExpenses"
+          @changed="handleMaintenanceChanged"
+        />
       </section>
 
       <DriverRoster :drivers="overview.drivers" />

@@ -24,22 +24,24 @@ type MaintenanceReminder struct {
 	DueDate           string    `gorm:"size:32" json:"dueDate"`
 	RemainingHours    float64   `json:"remainingHours"`
 	Level             string    `gorm:"size:16" json:"level"`
+	Status            string    `gorm:"size:20;index" json:"status"`
+	ActiveOrderID     string    `gorm:"size:32" json:"activeOrderId"`
 	LastServiceRecord string    `gorm:"size:128" json:"lastServiceRecord"`
 	CreatedAt         time.Time `json:"-"`
 }
 
 // Driver 驾驶员。
 type Driver struct {
-	ID           string    `gorm:"primaryKey;size:32" json:"id"`
-	Name         string    `gorm:"size:64" json:"name"`
-	LicenseNo    string    `gorm:"size:32" json:"licenseNo"`
-	Phone        string    `gorm:"size:32" json:"phone"`
-	Shift        string    `gorm:"size:16" json:"shift"`
-	RestDay      string    `gorm:"size:16" json:"restDay"`
-	MonthAreaMu  float64   `json:"monthAreaMu"`
-	Rating       float64   `json:"rating"`
-	Status       string    `gorm:"size:16" json:"status"`
-	CreatedAt    time.Time `json:"-"`
+	ID          string    `gorm:"primaryKey;size:32" json:"id"`
+	Name        string    `gorm:"size:64" json:"name"`
+	LicenseNo   string    `gorm:"size:32" json:"licenseNo"`
+	Phone       string    `gorm:"size:32" json:"phone"`
+	Shift       string    `gorm:"size:16" json:"shift"`
+	RestDay     string    `gorm:"size:16" json:"restDay"`
+	MonthAreaMu float64   `json:"monthAreaMu"`
+	Rating      float64   `json:"rating"`
+	Status      string    `gorm:"size:16" json:"status"`
+	CreatedAt   time.Time `json:"-"`
 }
 
 // DashboardItem 功能模块卡片。

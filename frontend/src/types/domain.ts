@@ -63,7 +63,39 @@ export interface MaintenanceReminder {
   dueDate: string;
   remainingHours: number;
   level: string;
+  status: string;
+  activeOrderId: string;
   lastServiceRecord: string;
+}
+
+export interface MaintenanceOrder {
+  id: string;
+  reminderId: string;
+  machineCode: string;
+  title: string;
+  planDate: string;
+  servicePoint: string;
+  status: string;
+  rejectReason: string;
+  actualHours: number;
+  cost: number;
+  nextRemainHours: number;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface MaintenanceExpense {
+  id: string;
+  orderId: string;
+  machineCode: string;
+  reminderId: string;
+  title: string;
+  servicePoint: string;
+  actualHours: number;
+  cost: number;
+  nextRemainHours: number;
+  paidAt: string;
+  createdAt: string;
 }
 
 export interface Driver {
@@ -94,6 +126,8 @@ export interface FarmOverview {
   tracks: TrackPoint[];
   records: WorkRecord[];
   maintenance: MaintenanceReminder[];
+  maintenanceOrders: MaintenanceOrder[];
+  maintenanceExpenses: MaintenanceExpense[];
   drivers: Driver[];
   board: DispatchBoard;
   stats: {

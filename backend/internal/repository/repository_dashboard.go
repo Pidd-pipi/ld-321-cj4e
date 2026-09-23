@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/agridispatch/agridispatch/internal/constants"
 	"github.com/agridispatch/agridispatch/internal/model"
 	"gorm.io/gorm"
 )
@@ -41,6 +42,12 @@ func (r *DashboardRepository) Overview() (*model.FarmOverview, error) {
 	if err := r.db.Find(&ov.Maintenance).Error; err != nil {
 		return nil, fmt.Errorf("load maintenance: %w", err)
 	}
+	if err := r.db.Order("created_at DESC").Find(&ov.MaintenanceOrders).Error; err != nil {
+		return nil, fmt.Errorf("load maintenance orders: %w", err)
+	}
+	if err := r.db.Order("created_at DESC").Find(&ov.MaintenanceExpenses).Error; err != nil {
+		return nil, fmt.Errorf("load maintenance expenses: %w", err)
+	}
 	if err := r.db.Find(&ov.Drivers).Error; err != nil {
 		return nil, fmt.Errorf("load drivers: %w", err)
 	}
@@ -63,6 +70,9 @@ func (r *DashboardRepository) board(ov *model.FarmOverview) model.DispatchBoard 
 		}
 	}
 	for _, m := range ov.Maintenance {
+		if m.Status == constants.ReminderDone {
+			continue
+		}
 		dueList = append(dueList, fmt.Sprintf("%s %s", m.MachineCode, m.Title))
 	}
 	return model.DispatchBoard{

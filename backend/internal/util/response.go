@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/agridispatch/agridispatch/internal/constants"
+	bizerrors "github.com/agridispatch/agridispatch/internal/errors"
 	"github.com/agridispatch/agridispatch/internal/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -33,10 +34,36 @@ func Fail(c *gin.Context, status, code int, message string) {
 
 // FailError 根据错误类型转换为统一响应。
 func FailError(c *gin.Context, err error) {
+	var bizErr *bizerrors.BusinessError
+	if errors.As(err, &bizErr) {
+		Fail(c, httpStatusByCode(bizErr.Code), bizErr.Code, bizErr.Message)
+		return
+	}
 	switch {
 	case errors.Is(err, repository.ErrNotFound):
 		Fail(c, http.StatusNotFound, constants.CodeNotFound, err.Error())
 	default:
 		Fail(c, http.StatusBadRequest, constants.CodeBadRequest, err.Error())
+	}
+}
+
+// httpStatusByCode 将业务错误码映射到 HTTP 状态。
+func httpStatusByCode(code int) int {
+	switch code {
+	case constants.CodeUnauthorized:
+		return http.StatusUnauthorized
+	case constants.CodeForbidden:
+		return http.StatusForbidden
+	case constants.CodeNotFound:
+		return http.StatusNotFound
+	case constants.CodeTooManyRequests:
+		return http.StatusTooManyRequests
+	case constants.CodeReminderStateConflict,
+		constants.CodeMachineBusy,
+		constants.CodeOrderStateConflict,
+		constants.CodeOrderDuplicateDone:
+		return http.StatusConflict
+	default:
+		return http.StatusBadRequest
 	}
 }
