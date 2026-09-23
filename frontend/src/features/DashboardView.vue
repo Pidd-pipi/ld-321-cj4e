@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import DriverRoster from '../components/DriverRoster.vue';
 import MachineTable from '../components/MachineTable.vue';
 import MaintenanceList from '../components/MaintenanceList.vue';
+import MaintenanceOrders from '../components/MaintenanceOrders.vue';
 import MapTrackPanel from '../components/MapTrackPanel.vue';
 import MetricCard from '../components/MetricCard.vue';
 import RecordStats from '../components/RecordStats.vue';
@@ -15,7 +16,7 @@ const overview = ref<FarmOverview>();
 const loading = ref(true);
 const error = ref('');
 
-onMounted(async () => {
+const loadOverview = async () => {
   try {
     overview.value = await fetchFarmOverview();
     logger.info('farm overview loaded');
@@ -24,7 +25,15 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
-});
+};
+
+const refresh = async () => {
+  loading.value = true;
+  error.value = '';
+  await loadOverview();
+};
+
+onMounted(loadOverview);
 </script>
 
 <template>
@@ -49,8 +58,10 @@ onMounted(async () => {
 
       <section class="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
         <RecordStats :records="overview.records" />
-        <MaintenanceList :reminders="overview.maintenance" />
+        <MaintenanceList :reminders="overview.maintenance" :on-refresh="refresh" />
       </section>
+
+      <MaintenanceOrders :orders="overview.orders" :costs="overview.costs" :on-refresh="refresh" />
 
       <DriverRoster :drivers="overview.drivers" />
 

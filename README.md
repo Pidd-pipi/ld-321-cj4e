@@ -89,6 +89,9 @@ go run ./cmd/server
 | GET | /dashboard/overview | 调度看板总览（农机/任务/轨迹/统计/保养/驾驶员） | - |
 | POST | /dashboard/tasks/:id/dispatch | 一键派单（推荐空闲农机与驾驶员） | - |
 | GET | /dashboard/reports/work/export | 作业报表导出信息 | - |
+| POST | /maintenance/orders | 从保养提醒开单（计划日期、维修点；作业中/已有未结束工单拒绝并留痕） | - |
+| POST | /maintenance/orders/:id/complete | 完工填报（工时、费用、下次剩余小时；重复完工 409 不产生第二笔费用） | - |
+| POST | /maintenance/orders/:id/cancel | 取消未完工工单（释放农机、恢复提醒） | - |
 | GET | /ws | WebSocket 实时轨迹推送 | - |
 | GET | /healthz | 健康检查（DB + Redis） | - |
 

@@ -42,10 +42,18 @@ func Connect(dsn string, maxOpen, maxIdle, connMaxLifetime, retryCount, retryInt
 		&model.TrackPoint{},
 		&model.WorkRecord{},
 		&model.MaintenanceReminder{},
+		&model.MaintenanceOrder{},
+		&model.MaintenanceCost{},
 		&model.Driver{},
 		&model.DashboardItem{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
+	}
+	// 存量提醒节点补默认状态（AutoMigrate 新列默认空串）。
+	if err := db.Model(&model.MaintenanceReminder{}).
+		Where("status = ?", "").
+		Update("status", "待处理").Error; err != nil {
+		return nil, fmt.Errorf("backfill reminder status: %w", err)
 	}
 	return db, nil
 }
@@ -118,12 +126,19 @@ func Seed(db *gorm.DB) error {
 	}
 	// 保养提醒
 	reminders := []model.MaintenanceReminder{
-		{ID: "s1", MachineCode: "NJ-2026-001", Title: "100 小时换机油", DueDate: "2026-06-05", RemainingHours: 16, Level: "warning", LastServiceRecord: "2026-04-28 已更换滤芯"},
-		{ID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", DueDate: "2026-06-02", RemainingHours: 0, Level: "danger", LastServiceRecord: "2026-05-25 漏油维修"},
-		{ID: "s3", MachineCode: "NJ-2026-002", Title: "刀盘检查", DueDate: "2026-06-12", RemainingHours: 42, Level: "normal", LastServiceRecord: "2026-05-12 例行保养"},
+		{ID: "s1", MachineCode: "NJ-2026-001", Title: "100 小时换机油", DueDate: "2026-06-05", RemainingHours: 16, Level: "warning", LastServiceRecord: "2026-04-28 已更换滤芯", Status: "待处理"},
+		{ID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", DueDate: "2026-06-02", RemainingHours: 0, Level: "danger", LastServiceRecord: "2026-05-25 漏油维修", Status: "处理中"},
+		{ID: "s3", MachineCode: "NJ-2026-002", Title: "刀盘检查", DueDate: "2026-06-12", RemainingHours: 42, Level: "normal", LastServiceRecord: "2026-05-12 例行保养", Status: "待处理"},
 	}
 	if err := db.Create(&reminders).Error; err != nil {
 		return fmt.Errorf("seed reminders: %w", err)
+	}
+	// 保养工单（s2 提醒已开单，NJ-2026-003 处于维修中）
+	orders := []model.MaintenanceOrder{
+		{ID: "mo-seed-1", ReminderID: "s2", MachineCode: "NJ-2026-003", Title: "液压系统复检", PlanDate: "2026-06-02", RepairPoint: "西坡农机服务站", Status: "处理中"},
+	}
+	if err := db.Create(&orders).Error; err != nil {
+		return fmt.Errorf("seed maintenance orders: %w", err)
 	}
 	// 驾驶员
 	drivers := []model.Driver{

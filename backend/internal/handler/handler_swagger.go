@@ -20,7 +20,10 @@ const swaggerJSON = `{
     "/auth/me": { "get": { "summary": "当前用户", "tags": ["auth"] } },
     "/dashboard/overview": { "get": { "summary": "调度看板总览", "tags": ["dashboard"] } },
     "/dashboard/tasks/{id}/dispatch": { "post": { "summary": "一键派单", "tags": ["dashboard"] } },
-    "/dashboard/reports/work/export": { "get": { "summary": "作业报表导出", "tags": ["dashboard"] } }
+    "/dashboard/reports/work/export": { "get": { "summary": "作业报表导出", "tags": ["dashboard"] } },
+    "/maintenance/orders": { "post": { "summary": "从保养提醒开单（作业中或已有未结束工单则拒绝并留痕）", "tags": ["maintenance"] } },
+    "/maintenance/orders/{id}/complete": { "post": { "summary": "完工填报：工时、费用、下次剩余小时，工单/费用/提醒/农机空闲同事务生效，重复完工不产生第二笔费用", "tags": ["maintenance"] } },
+    "/maintenance/orders/{id}/cancel": { "post": { "summary": "取消未完工工单：释放农机并恢复提醒", "tags": ["maintenance"] } }
   }
 }`
 

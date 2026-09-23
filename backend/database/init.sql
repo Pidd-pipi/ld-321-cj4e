@@ -76,7 +76,41 @@ CREATE TABLE IF NOT EXISTS maintenance_reminders (
   remaining_hours DECIMAL(8,2) DEFAULT 0,
   level VARCHAR(16) DEFAULT 'normal',
   last_service_record VARCHAR(128) DEFAULT '',
+  status VARCHAR(16) DEFAULT '待处理',
   created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS maintenance_orders (
+  id VARCHAR(48) PRIMARY KEY,
+  reminder_id VARCHAR(32) DEFAULT '',
+  machine_code VARCHAR(32) NOT NULL,
+  title VARCHAR(128) DEFAULT '',
+  plan_date VARCHAR(32) DEFAULT '',
+  repair_point VARCHAR(128) DEFAULT '',
+  status VARCHAR(20) DEFAULT '处理中',
+  reject_reason VARCHAR(255) DEFAULT '',
+  actual_hours DECIMAL(8,2) DEFAULT 0,
+  cost DECIMAL(10,2) DEFAULT 0,
+  next_remain_hour DECIMAL(8,2) DEFAULT 0,
+  completed_at DATETIME(3) NULL,
+  cancelled_at DATETIME(3) NULL,
+  created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  INDEX idx_order_reminder (reminder_id),
+  INDEX idx_order_machine (machine_code),
+  INDEX idx_order_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS maintenance_costs (
+  id VARCHAR(48) PRIMARY KEY,
+  order_id VARCHAR(48) NOT NULL UNIQUE,
+  machine_code VARCHAR(32) NOT NULL,
+  amount DECIMAL(10,2) DEFAULT 0,
+  actual_hours DECIMAL(8,2) DEFAULT 0,
+  next_remain_hour DECIMAL(8,2) DEFAULT 0,
+  recorded_at VARCHAR(32) DEFAULT '',
+  created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  INDEX idx_cost_machine (machine_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS drivers (

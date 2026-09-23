@@ -26,6 +26,11 @@ func (e *ValidationError) Error() string {
 	return "validation: " + e.Message
 }
 
+// NewValidationError 构造参数校验错误。
+func NewValidationError(message string) *ValidationError {
+	return &ValidationError{Message: message}
+}
+
 // MachineOfflineError 农机离线错误。
 type MachineOfflineError struct {
 	MachineCode string
